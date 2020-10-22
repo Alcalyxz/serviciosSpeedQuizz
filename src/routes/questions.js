@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client('165044966075-9ldb1hk170c9oi17sgp7m9s4qg6mkihe.apps.googleusercontent.com');
 
 const mysqlConnection = require('../database');
 
@@ -62,5 +64,60 @@ router.put('/:correo', (req, res) => {
         }
     });
 })
+
+router.post('/agregar', (req, res) => {
+    const usuario = req.body;
+    var query = mysqlConnection.query('INSERT INTO bidymhlzbianwu4rbvbz.Usuario (Tip_id_TipoLogin, nombre, nickname, correo, password, fecha_nacimiento, icono, puntuacion, institucion, carrera, Li_id_Liga, Est_id_estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);',
+    [1, usuario.nombre, usuario.nickName, usuario.correo, usuario.contrasena, usuario.fechaNacimiento, 'sinIconoPorAhora',0, usuario.institucion, usuario.carrera, 1, 1 ], function (error, result) {
+        if (error) {
+            throw error;
+        } else {
+            console.log(result);
+        }
+    }
+    );
+
+    console.log(usuario);
+    res.json("respusido");
+
+});
+
+async function verify(token) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: '165044966075-9ldb1hk170c9oi17sgp7m9s4qg6mkihe.apps.googleusercontent.com',  // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+    });
+    const payload = ticket.getPayload();
+
+    return{
+        nomre: payload.name,
+        correo: payload.email,
+        foto: payload.picture
+    }
+    
+   
+
+  }
+  
+
+router.post('/g-login', async (req, res) => {
+     let token = req.body.token;
+
+     let googleUser = await verify(token).catch(err => {
+        return res.status(403, json({
+            ok: false,
+            error: err
+        }));
+     });
+
+     
+
+    res.json({
+        usuario: googleUser
+    });
+}); 
+
 
 module.exports = router;
