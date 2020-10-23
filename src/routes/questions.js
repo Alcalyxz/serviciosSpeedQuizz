@@ -3,48 +3,60 @@ const router = express.Router();
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('165044966075-9ldb1hk170c9oi17sgp7m9s4qg6mkihe.apps.googleusercontent.com');
 
-const mysqlConnection = require('../database');
+const mysqlPoolConnection = require('../database');
 
 router.get('/tipopregunta', (req, res) => {
-    mysqlConnection.query('SELECT nombre FROM bidymhlzbianwu4rbvbz.Tipo', (err, rows, fields) => {
-        if (!err) {
-            res.json(rows)
-        } else {
-            console.log(err);
-        }
+    mysqlPoolConnection.getConnection((err, connection)=>{
+        connection.query('SELECT nombre FROM bidymhlzbianwu4rbvbz.Tipo', (err, rows, fields) => {
+            if (!err) {
+                res.json(rows)
+            } else {
+                console.log(err);
+            }
+        });
+        connection.release();
     });
-})
+});
 
 router.get('/usuarios', (req, res) => {
-    mysqlConnection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Usuario', (err, rows, fields) => {
-        if (!err) {
-            res.json(rows)
-        } else {
-            console.log(err);
-        }
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Usuario', (err, rows, fields) => {
+            if (!err) {
+                res.json(rows)
+            } else {
+                console.log(err);
+            }
+        });
+        connection.release();
     });
-})
+});
+ 
+ router.get('/dificultadpregunta', (req, res) => {
+     mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('SELECT nivel FROM bidymhlzbianwu4rbvbz.Dificultad', (err, rows, fields) => {
+            if (!err) {
+                res.json(rows)
+            } else {
+                console.log(err);
+            }
+        });
+        connection.release();
+     });
+});
 
-router.get('/dificultadpregunta', (req, res) => {
-    mysqlConnection.query('SELECT nivel FROM bidymhlzbianwu4rbvbz.Dificultad', (err, rows, fields) => {
-        if (!err) {
-            res.json(rows)
-        } else {
-            console.log(err);
-        }
-    });
-})
-
-router.get('/:correo', (req, res) => {
+ router.get('/:correo', (req, res) => {
     const { correo } = req.params;
-    mysqlConnection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Usuario where correo = ?', [correo], (err, rows, fields) => {
-        if (!err) {
-            res.json(rows);
-        } else {
-            console.log(err);
-        }
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Usuario where correo = ?', [correo], (err, rows, fields) => {
+            if (!err) {
+                res.json(rows);
+            } else {
+                console.log(err);
+            }
+        });
+        connection.release();
     });
-})
+});
 
 
 
@@ -54,35 +66,43 @@ router.get('/:correo', (req, res) => {
 router.put('/:correo', (req, res) => {
     const { puntuacion } = req.body;
     const { correo } = req.params;
-
-    mysqlConnection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET puntuacion=? where correo=?', [puntuacion, correo], (err, rows, fields) => {
-        if (!err) {
-            console.log("Actualizado con exito");
-            res.json("respusido");
-        } else {
-            console.log(err);
-        }
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET puntuacion=? where correo=?', [puntuacion, correo], (err, rows, fields) => {
+            if (!err) {
+                console.log("Actualizado con exito");
+                res.json("respusido");
+            } else {
+                console.log(err);
+            }
+        });
+        connection.release();
     });
-})
+});
 
 router.post('/agregar', (req, res) => {
     const usuario = req.body;
-    var query = mysqlConnection.query('INSERT INTO bidymhlzbianwu4rbvbz.Usuario (Tip_id_TipoLogin, nombre, nickname, correo, password, fecha_nacimiento, icono, puntuacion, institucion, carrera, Li_id_Liga, Est_id_estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);',
-    [1, usuario.nombre, usuario.nickName, usuario.correo, usuario.contrasena, usuario.fechaNacimiento, 'sinIconoPorAhora',0, usuario.institucion, usuario.carrera, 1, 1 ], function (error, result) {
-        if (error) {
-            throw error;
-        } else {
-            console.log(result);
-        }
-    }
-    );
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('INSERT INTO bidymhlzbianwu4rbvbz.Usuario (Tip_id_TipoLogin, nombre, nickname, correo, password, fecha_nacimiento, icono, puntuacion, institucion, carrera, Li_id_Liga, Est_id_estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);',
+        [1, usuario.nombre, usuario.nickName, usuario.correo, usuario.contrasena, usuario.fechaNacimiento, 'sinIconoPorAhora',0, usuario.institucion, usuario.carrera, 1, 1 ], function (error, result) {
+            if (error) {
+                throw error;
+            } else {
+                console.log(result);
+            }
+        });
+        connection.release();
+    });
 
     console.log(usuario);
     res.json("respusido");
 
 });
 
-async function verify(token) {
+
+
+
+
+/* async function verify(token) {
     const ticket = await client.verifyIdToken({
         idToken: token,
         audience: '165044966075-9ldb1hk170c9oi17sgp7m9s4qg6mkihe.apps.googleusercontent.com',  // Specify the CLIENT_ID of the app that accesses the backend
@@ -117,7 +137,7 @@ router.post('/g-login', async (req, res) => {
     res.json({
         usuario: googleUser
     });
-}); 
+});   */
 
 
 module.exports = router;
