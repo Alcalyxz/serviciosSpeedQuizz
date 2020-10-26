@@ -102,7 +102,7 @@ router.post('/agregar', (req, res) => {
 
 
 
-/* async function verify(token) {
+ async function verify(token) {
     const ticket = await client.verifyIdToken({
         idToken: token,
         audience: '165044966075-9ldb1hk170c9oi17sgp7m9s4qg6mkihe.apps.googleusercontent.com',  // Specify the CLIENT_ID of the app that accesses the backend
@@ -137,7 +137,7 @@ router.post('/g-login', async (req, res) => {
     res.json({
         usuario: googleUser
     });
-});   */
+});   
 
 
 module.exports = router;
