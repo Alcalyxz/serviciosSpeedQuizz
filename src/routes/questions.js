@@ -64,13 +64,17 @@ router.get('/usuarios', (req, res) => {
 //WHERE (`id_Usuario` = '1') and (`Li_id_Liga` = '1') and (`Est_id_estado` = '1');
 
 router.put('/:correo', (req, res) => {
-    const { puntuacion } = req.body;
+    const  usModifica  = req.body;
     const { correo } = req.params;
     mysqlPoolConnection.getConnection((err, connection) => {
-        connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET puntuacion=? where correo=?', [puntuacion, correo], (err, rows, fields) => {
+        connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET nombre=?, nickname= ?, correo= ?, fecha_nacimiento= ?, institucion= ?, carrera = ?  where correo=?', 
+        [usModifica.nombre, usModifica.nickName, usModifica.correo, usModifica.fechaNacimiento, usModifica.institucion, usModifica.carrera, correo], (err, rows, fields) => {
             if (!err) {
                 console.log("Actualizado con exito");
-                res.json("respusido");
+                res.json({
+                    state: 'changed',
+                    err: false
+                });
             } else {
                 console.log(err);
             }
