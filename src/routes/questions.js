@@ -45,9 +45,10 @@ router.get('/dificultadpregunta', (req, res) => {
     });
 });
 
-router.get('/preguntaFV', (req, res) => {
+router.get('/gPregunta/:tipo', (req, res) => {
+    const { tipo } = req.params;
      mysqlPoolConnection.getConnection((err, connection) => {
-        connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Pregunta AS p WHERE p.Ti_id_tipo= ? ', [3], async (err, rows, fields) => {
+        connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Pregunta AS p WHERE p.Ti_id_tipo= ? ', [tipo], async (err, rows, fields) => {
             if (!err) {
                 let r = random.int(0, rows.length - 1);
                 /* console.log(r); */
