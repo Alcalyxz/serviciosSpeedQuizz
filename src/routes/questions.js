@@ -82,13 +82,15 @@ function getOpcion(id_pregunta) {
                 if (!err) {
                     let respuestas = rows;
                     /* console.log(respuestas);  */
+                     connection.release();
                      resolve(respuestas);
     
                 } else {
+                    connection.release();
                     reject(err);
                 }
             });
-            connection.release();
+            
         });
     });
 }
@@ -100,13 +102,15 @@ function getAyuda(id_pregunta) {
                 if (!err) {
                     let respuestas = rows;
                     /* console.log(respuestas);  */
+                    connection.release();
                      resolve(respuestas);
     
                 } else {
+                    connection.release();
                     reject(err);
                 }
             });
-            connection.release();
+            
         });
     });
 }
