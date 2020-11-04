@@ -166,7 +166,7 @@ router.post('/agregar', (req, res) => {
     const usuario = req.body;
     mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('INSERT INTO bidymhlzbianwu4rbvbz.Usuario (Tip_id_TipoLogin, nombre, nickname, correo, password, fecha_nacimiento, icono, puntuacion, institucion, carrera, Li_id_Liga, Est_id_estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);',
-            [1, usuario.nombre, usuario.nickName, usuario.correo, usuario.contrasena, usuario.fechaNacimiento, 'sinIconoPorAhora', 0, usuario.institucion, usuario.carrera, 1, 1], function (error, result) {
+            [1, usuario.nombre, usuario.nickname, usuario.correo, usuario.password, usuario.fecha_nacimiento, 'sinIconoPorAhora', 0, usuario.institucion, usuario.carrera, 1, 1], function (error, result) {
                 if (error) {
                     throw error;
                 } else {
