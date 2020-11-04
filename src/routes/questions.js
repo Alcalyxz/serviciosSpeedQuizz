@@ -164,7 +164,7 @@ router.put('/:correo', (req, res) => {
 
 router.post('/agregar', (req, res) => {
     const usuario = req.body;
-    if(usuario.fecha_nacimiento == null){
+    if(usuario.fecha_nacimiento == null || usuario.fecha_nacimiento == ''){
         usuario.fecha_nacimiento = '0000-00-00'; 
     }
     mysqlPoolConnection.getConnection((err, connection) => {
