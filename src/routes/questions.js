@@ -142,7 +142,7 @@ router.get('/:correo', (req, res) => {
 
 router.put('/:correo', (req, res) => {
     const usModifica = req.body;
-    if(usModifica.fecha_nacimiento == null || usModifica.fecha_nacimiento == ''){
+    if(usModifica.fecha_nacimiento == null || usModifica.fecha_nacimiento == '' || usModifica.fecha_nacimiento == 'null'){
         usModifica.fecha_nacimiento = '0000-00-00'; 
     }
     const { correo } = req.params;
@@ -167,7 +167,7 @@ router.put('/:correo', (req, res) => {
 
 router.post('/agregar', (req, res) => {
     const usuario = req.body;
-    if(usuario.fecha_nacimiento == null || usuario.fecha_nacimiento == ''){
+    if(usuario.fecha_nacimiento == null || usuario.fecha_nacimiento == '' || usuario.fecha_nacimiento == 'null'){
         usuario.fecha_nacimiento = '0000-00-00'; 
     }
     mysqlPoolConnection.getConnection((err, connection) => {
