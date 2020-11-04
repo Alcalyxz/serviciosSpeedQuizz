@@ -19,6 +19,7 @@ router.get('/tipopregunta', (req, res) => {
     });
 });
 
+
 router.get('/usuarios', (req, res) => {
     mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Usuario', (err, rows, fields) => {
