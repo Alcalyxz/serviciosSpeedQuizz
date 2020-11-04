@@ -47,17 +47,18 @@ router.get('/dificultadpregunta', (req, res) => {
 
 router.get('/gPregunta/:tipo', (req, res) => {
     const { tipo } = req.params;
-     mysqlPoolConnection.getConnection((err, connection) => {
+    mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Pregunta AS p WHERE p.Ti_id_tipo= ? ', [tipo], async (err, rows, fields) => {
             if (!err) {
                 let r = random.int(0, rows.length - 1);
-                /* console.log(r); */
-                /* res.json(rows[r]); */
+
                 let pregunta = rows[r];
-                /* console.log(pregunta.id_Pregunta); */
+
+                connection.release();
+
                 let opciones = await getOpcion(pregunta.id_Pregunta);
                 let ayuda = await getAyuda(pregunta.id_Pregunta);
-                
+
                 res.json({
                     enunciado: pregunta.enunciado,
                     opciones: opciones,
@@ -70,7 +71,7 @@ router.get('/gPregunta/:tipo', (req, res) => {
                 console.log(err);
             }
         });
-        connection.release();
+
     });
 });
 
@@ -81,16 +82,16 @@ function getOpcion(id_pregunta) {
             connection.query('SELECT o.contenido, op.correcta from bidymhlzbianwu4rbvbz.OpcionXPregunta as op INNER JOIN bidymhlzbianwu4rbvbz.Opcion AS o ON op.Op_id_Opcion = o.id_Opcion  WHERE op.Pr_id_Pregunta = ?', [id_pregunta], (err, rows, fields) => {
                 if (!err) {
                     let respuestas = rows;
-                    /* console.log(respuestas);  */
-                     connection.release();
-                     resolve(respuestas);
-    
+
+                    connection.release();
+                    resolve(respuestas);
+
                 } else {
                     connection.release();
                     reject(err);
                 }
             });
-            
+
         });
     });
 }
@@ -101,16 +102,16 @@ function getAyuda(id_pregunta) {
             connection.query('SELECT a.contenido from bidymhlzbianwu4rbvbz.Pregunta AS p INNER JOIN bidymhlzbianwu4rbvbz.Ayuda AS a ON p.id_Pregunta = a.Pr_id_Pregunta WHERE p.id_Pregunta = ?', [id_pregunta], (err, rows, fields) => {
                 if (!err) {
                     let respuestas = rows;
-                    /* console.log(respuestas);  */
+
                     connection.release();
-                     resolve(respuestas);
-    
+                    resolve(respuestas);
+
                 } else {
                     connection.release();
                     reject(err);
                 }
             });
-            
+
         });
     });
 }
@@ -178,6 +179,9 @@ router.post('/agregar', (req, res) => {
     res.json("respusido");
 
 });
+
+
+
 
 
 
