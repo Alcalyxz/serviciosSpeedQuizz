@@ -142,10 +142,13 @@ router.get('/:correo', (req, res) => {
 
 router.put('/:correo', (req, res) => {
     const usModifica = req.body;
+    if(usModifica.fecha_nacimiento == null || usModifica.fecha_nacimiento == ''){
+        usModifica.fecha_nacimiento = '0000-00-00'; 
+    }
     const { correo } = req.params;
     mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET nombre=?, nickname= ?, correo= ?, fecha_nacimiento= ?, institucion= ?, carrera = ?  where correo=?',
-            [usModifica.nombre, usModifica.nickName, usModifica.correo, usModifica.fechaNacimiento, usModifica.institucion, usModifica.carrera, correo], (err, rows, fields) => {
+            [usModifica.nombre, usModifica.nickname, usModifica.correo, usModifica.fecha_nacimiento, usModifica.institucion, usModifica.carrera, correo], (err, rows, fields) => {
                 if (!err) {
                     console.log("Actualizado con exito");
                     res.json({
