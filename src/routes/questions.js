@@ -221,18 +221,15 @@ router.post('/agregar', (req, res) => {
                         });
                     }
                 } else {
+                    res.json("respusido");
                     console.log("Agregado con exito");
-                    res.json({
-                        state: 'Added',
-                        err: false
-                    });
                 }
             });
         connection.release();
     });
 
     console.log(usuario);
-    res.json("respusido");
+    
 
 });
 
