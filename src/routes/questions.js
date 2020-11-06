@@ -19,6 +19,7 @@ router.get('/tipopregunta', (req, res) => {
     });
 });
 
+
 router.get('/usuarios', (req, res) => {
     mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Usuario', (err, rows, fields) => {
@@ -141,10 +142,13 @@ router.get('/:correo', (req, res) => {
 
 router.put('/:correo', (req, res) => {
     const usModifica = req.body;
+    if(usModifica.fecha_nacimiento == null || usModifica.fecha_nacimiento == '' || usModifica.fecha_nacimiento == 'null'){
+        usModifica.fecha_nacimiento = '0000-00-00'; 
+    }
     const { correo } = req.params;
     mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET nombre=?, nickname= ?, correo= ?, fecha_nacimiento= ?, institucion= ?, carrera = ?  where correo=?',
-            [usModifica.nombre, usModifica.nickName, usModifica.correo, usModifica.fechaNacimiento, usModifica.institucion, usModifica.carrera, correo], (err, rows, fields) => {
+            [usModifica.nombre, usModifica.nickname, usModifica.correo, usModifica.fecha_nacimiento, usModifica.institucion, usModifica.carrera, correo], (err, rows, fields) => {
                 if (!err) {
                     console.log("Actualizado con exito");
                     res.json({
@@ -152,7 +156,42 @@ router.put('/:correo', (req, res) => {
                         err: false
                     });
                 } else {
-                    console.log(err);
+                    if(err.code === 'ER_DUP_ENTRY'){
+                        res.json({
+                            state: 'failed',
+                            err: 'Campo (s) repetidos'
+                        });                        
+                    } else if(err.code === 'ER_DATA_TOO_LONG') {
+                        res.json({
+                            state: 'failed',
+                            err: 'Campo (s) demasiado largos'
+                        });
+                    }
+                }
+            });
+        connection.release();
+    });
+});
+
+router.put('/cambioContra/:correo', (req, res) => {
+    const Upassword = req.body;
+    const { correo } = req.params;
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET password = ?  where correo=?',
+            [Upassword.password, correo], (err, rows, fields) => {
+                if (!err) {
+                    console.log("Actualizado con exito");
+                    res.json({
+                        state: 'changed',
+                        err: false
+                    });
+                } else {
+                    if(err.code === 'ER_DATA_TOO_LONG') {
+                        res.json({
+                            state: 'failed',
+                            err: 'Campo (s) demasiado largos'
+                        });
+                    }
                 }
             });
         connection.release();
@@ -163,20 +202,34 @@ router.put('/:correo', (req, res) => {
 
 router.post('/agregar', (req, res) => {
     const usuario = req.body;
+    if(usuario.fecha_nacimiento == null || usuario.fecha_nacimiento == '' || usuario.fecha_nacimiento == 'null'){
+        usuario.fecha_nacimiento = '0000-00-00'; 
+    }
     mysqlPoolConnection.getConnection((err, connection) => {
         connection.query('INSERT INTO bidymhlzbianwu4rbvbz.Usuario (Tip_id_TipoLogin, nombre, nickname, correo, password, fecha_nacimiento, icono, puntuacion, institucion, carrera, Li_id_Liga, Est_id_estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);',
-            [1, usuario.nombre, usuario.nickName, usuario.correo, usuario.contrasena, usuario.fechaNacimiento, 'sinIconoPorAhora', 0, usuario.institucion, usuario.carrera, 1, 1], function (error, result) {
-                if (error) {
-                    throw error;
+            [1, usuario.nombre, usuario.nickname, usuario.correo, usuario.password, usuario.fecha_nacimiento, 'sinIconoPorAhora', 0, usuario.institucion, usuario.carrera, 1, 1], function (err, result) {
+                if (err) {
+                    if(err.code === 'ER_DUP_ENTRY'){
+                        res.json({
+                            state: 'failed',
+                            err: 'Campo (s) repetidos'
+                        });                        
+                    } else if(err.code === 'ER_DATA_TOO_LONG') {
+                        res.json({
+                            state: 'failed',
+                            err: 'Campo (s) demasiado largos'
+                        });
+                    }
                 } else {
-                    console.log(result);
+                    res.json("respusido");
+                    console.log("Agregado con exito");
                 }
             });
         connection.release();
     });
 
     console.log(usuario);
-    res.json("respusido");
+    
 
 });
 
