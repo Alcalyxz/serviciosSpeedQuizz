@@ -60,6 +60,18 @@ router.get('/gPregunta/:tipo', (req, res) => {
                 let opciones = await getOpcion(pregunta.id_Pregunta);
                 let ayuda = await getAyuda(pregunta.id_Pregunta);
 
+                if(tipo == 5){
+                    opciones = opciones[0].contenido.split('-');
+                    /* console.log(opciones); */ 
+
+                }
+
+                if(tipo == 6){
+                    opciones = opciones[0].contenido.split(',');
+                    /* console.log(opciones);  */
+
+                }                
+
                 res.json({
                     enunciado: pregunta.enunciado,
                     opciones: opciones,
