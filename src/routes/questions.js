@@ -59,6 +59,7 @@ router.get('/gPregunta/:tipo', (req, res) => {
 
                 let opciones = await getOpcion(pregunta.id_Pregunta);
                 let ayuda = await getAyuda(pregunta.id_Pregunta);
+                let costos = await getCostos(pregunta.id_Pregunta);
 
                 if(tipo == 5){
                     opciones = opciones[0].contenido.split('-');
@@ -76,7 +77,8 @@ router.get('/gPregunta/:tipo', (req, res) => {
                     enunciado: pregunta.enunciado,
                     opciones: opciones,
                     ayuda: ayuda[0].contenido,
-                    tip: pregunta.tip
+                    tip: pregunta.tip,
+                    costos: costos
                 });
 
 
@@ -113,6 +115,26 @@ function getAyuda(id_pregunta) {
     return new Promise((resolve, reject) => {
         mysqlPoolConnection.getConnection((err, connection) => {
             connection.query('SELECT a.contenido from bidymhlzbianwu4rbvbz.Pregunta AS p INNER JOIN bidymhlzbianwu4rbvbz.Ayuda AS a ON p.id_Pregunta = a.Pr_id_Pregunta WHERE p.id_Pregunta = ?', [id_pregunta], (err, rows, fields) => {
+                if (!err) {
+                    let respuestas = rows;
+
+                    connection.release();
+                    resolve(respuestas);
+
+                } else {
+                    connection.release();
+                    reject(err);
+                }
+            });
+
+        });
+    });
+}
+
+function getCostos(id_pregunta) {
+    return new Promise((resolve, reject) => {
+        mysqlPoolConnection.getConnection((err, connection) => {
+            connection.query('SELECT d.costo_ayuda, d.puntos_acierto, d.puntos_fracaso, d.nivel from bidymhlzbianwu4rbvbz.Pregunta AS p INNER JOIN bidymhlzbianwu4rbvbz.Dificultad as d ON p.Dif_id_dificultad = d.id_dificultad WHERE p.id_Pregunta = ?', [id_pregunta], (err, rows, fields) => {
                 if (!err) {
                     let respuestas = rows;
 
