@@ -93,11 +93,15 @@ router.get('/gPregunta/:tipo', (req, res) => {
                     opciones = otroVector;
                 }
 
+                if(tipo!=5){
+                    opciones = shuffle(opciones);
+                }
+
 
 
                 res.json({
                     enunciado: pregunta.enunciado,
-                    opciones: shuffle(opciones),
+                    opciones: opciones,
                     ayuda: ayuda[0].contenido,
                     tip: pregunta.tip,
                     costos: costos
