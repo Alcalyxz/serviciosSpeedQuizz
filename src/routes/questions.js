@@ -97,7 +97,7 @@ router.get('/gPregunta/:tipo', (req, res) => {
 
                 res.json({
                     enunciado: pregunta.enunciado,
-                    opciones: opciones,
+                    opciones: shuffle(opciones),
                     ayuda: ayuda[0].contenido,
                     tip: pregunta.tip,
                     costos: costos
@@ -111,6 +111,21 @@ router.get('/gPregunta/:tipo', (req, res) => {
 
     });
 });
+
+/* function shuffle(array) {
+    array.sort(() => Math.random() - 0.5);
+  } */
+
+  function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
 
 
 function getOpcion(id_pregunta) {
