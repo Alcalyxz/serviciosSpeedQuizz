@@ -3,6 +3,7 @@ const router = express.Router();
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client('165044966075-9ldb1hk170c9oi17sgp7m9s4qg6mkihe.apps.googleusercontent.com');
 const random = require('random');
+const axios = require('axios');
 
 const mysqlPoolConnection = require('../database');
 
@@ -61,13 +62,13 @@ router.get('/gPregunta/:tipo', (req, res) => {
                 let ayuda = await getAyuda(pregunta.id_Pregunta);
                 let costos = await getCostos(pregunta.id_Pregunta);
 
-                if (tipo == 5) {
+                if (tipo == 4) {
                     opciones = opciones[0].contenido.split('-');
                     /* console.log(opciones); */
 
                 }
 
-                if (tipo == 6) {
+                if (tipo == 5) {
                     let opcionesmejores = [];
                     let otroVector = [];
                     let contador = 0;
@@ -93,13 +94,14 @@ router.get('/gPregunta/:tipo', (req, res) => {
                     opciones = otroVector;
                 }
 
-                if(tipo!=5){
+                if (tipo != 4) {
                     opciones = shuffle(opciones);
                 }
 
 
 
                 res.json({
+                    idPregunta: pregunta.id_Pregunta,
                     enunciado: pregunta.enunciado,
                     opciones: opciones,
                     ayuda: ayuda[0].contenido,
@@ -116,11 +118,50 @@ router.get('/gPregunta/:tipo', (req, res) => {
     });
 });
 
+router.get('/gQuiz', async (req, res) => {
+    const CANTIDAD_PREGUNTAS = 10;
+    let tipoPreg = 1;
+    let quiz = [];
+    let aux;
+    let aux2; 
+    for (let i = 0; i < CANTIDAD_PREGUNTAS; i++) {
+        if (i != 0 && i % 2 == 0) {
+            tipoPreg++;
+            /* console.log(tipoPreg); */
+        }
+        if (quiz.length !=0) {
+            do {
+                await axios.get(`http://localhost:3000/gPregunta/${tipoPreg}`).then(res => {
+                    aux = res.data;
+                });
+                aux2 = quiz.map(data => data.idPregunta)
+            } while (aux2.indexOf(aux.idPregunta) >= 0);
+            quiz.push(aux);
+        }else{
+            await axios.get(`http://localhost:3000/gPregunta/${tipoPreg}`).then(res => {
+                quiz.push(res.data);
+            });
+        }
+
+    }
+   /*  console.log(aux2); */
+    res.json({
+        size: quiz.length,
+        quiz: shuffle(quiz)
+    });
+
+
+
+    /* axios.get(`http://localhost:3000/gPregunta/${tipoPreg}`).then(res => {
+        console.log(res.data);
+    }) */
+});
+
 /* function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
   } */
 
-  function shuffle(a) {
+function shuffle(a) {
     var j, x, i;
     for (i = a.length - 1; i > 0; i--) {
         j = Math.floor(Math.random() * (i + 1));
