@@ -131,14 +131,14 @@ router.get('/gQuiz', async (req, res) => {
         }
         if (quiz.length !=0) {
             do {
-                await axios.get(`http://localhost:3000/gPregunta/${tipoPreg}`).then(res => {
+                await axios.get(`https://speedquiz-services.herokuapp.com/gPregunta/${tipoPreg}`).then(res => {
                     aux = res.data;
                 });
                 aux2 = quiz.map(data => data.idPregunta)
             } while (aux2.indexOf(aux.idPregunta) >= 0);
             quiz.push(aux);
         }else{
-            await axios.get(`http://localhost:3000/gPregunta/${tipoPreg}`).then(res => {
+            await axios.get(`https://speedquiz-services.herokuapp.com/gPregunta/${tipoPreg}`).then(res => {
                 quiz.push(res.data);
             });
         }
