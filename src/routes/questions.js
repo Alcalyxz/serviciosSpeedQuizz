@@ -102,6 +102,7 @@ router.get('/gPregunta/:tipo', (req, res) => {
 
                 res.json({
                     idPregunta: pregunta.id_Pregunta,
+                    tipoPregunta: pregunta.Ti_id_tipo,
                     enunciado: pregunta.enunciado,
                     opciones: opciones,
                     ayuda: ayuda[0].contenido,
