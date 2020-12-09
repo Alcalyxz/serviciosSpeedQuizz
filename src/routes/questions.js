@@ -315,6 +315,60 @@ router.put('/cambioContra/:correo', (req, res) => {
     });
 });
 
+router.put('/cambioPuntaje/:correo', async (req, res) => {
+    const puntaje = req.body;
+    const { correo } = req.params;
+    let puntajeAct = await getPuntaje(correo);
+    console.log('se obtuvo el puntaje actual, es ', puntajeAct);
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('UPDATE bidymhlzbianwu4rbvbz.Usuario SET puntuacion = ?  where correo=?',
+            [puntaje.puntaje + puntajeAct[0].puntuacion, correo], (err, rows, fields) => {
+                if (!err) {
+                    console.log("Actualizado con exito");
+                    res.json({
+                        state: 'changed',
+                        err: false
+                    });
+                } else {
+                    if (err.code === 'ER_DATA_TOO_LONG') {
+                        res.json({
+                            state: 'failed',
+                            err: 'Campo (s) demasiado largos'
+                        });
+                    }
+                }
+            });
+        connection.release();
+    });
+});
+
+
+
+function getPuntaje(correo) {
+    console.log('entra a obtener el puntaje');
+    return new Promise((resolve, reject) => {
+        console.log('entra a la promesa')
+        mysqlPoolConnection.getConnection((err, connection) => {
+            console.log('obtiene la conexión');
+            connection.query('SELECT puntuacion from bidymhlzbianwu4rbvbz.Usuario WHERE correo = ?', [correo], (err, rows, fields) => {
+                console.log('Obtiene bien la query');
+                if (!err) {
+                    let respuestas = rows;
+
+                    connection.release();
+                    console.log('devuelve el puntaje');
+                    resolve(respuestas);
+
+                } else {
+                    connection.release();
+                    console.log(err)
+                    reject(err);
+                }
+            });
+
+        });
+    });
+}
 
 
 router.post('/agregar', (req, res) => {
