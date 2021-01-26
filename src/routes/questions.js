@@ -119,6 +119,46 @@ router.get('/gPregunta/:tipo', (req, res) => {
     });
 });
 
+router.get('/gTodasPreguntas/:tipo', (req, res) => {
+    const { tipo } = req.params;
+    let preguntas = [];
+    let pregunta = {};  
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Pregunta AS p WHERE p.Ti_id_tipo= ? ', [tipo], async (err, rows, fields) => {
+            if(!err){
+                let preguntasDB = rows; 
+                //console.log(preguntasDB);
+                connection.release();
+                for(row of preguntasDB){
+                    let opciones = await getOpcion(row.id_Pregunta);
+                    let ayuda = await getAyuda(row.id_Pregunta);
+                    let costos = await getCostos(row.id_Pregunta);
+                    pregunta = {
+                        idPregunta: row.id_Pregunta,
+                        tipoPregunta: row.Ti_id_tipo,
+                        enunciado: row.enunciado,
+                        opciones: opciones,
+                        ayuda: ayuda[0].contenido,
+                        tip: row.tip,
+                        costos: costos
+                    }
+                    preguntas.push(pregunta); 
+                }
+                res.json({
+                    total: preguntas.length,
+                    preguntas: preguntas
+                });
+            }else{
+                res.json({
+                    err: err
+                })
+            }
+        });
+    });
+});
+        
+
+
 router.get('/gQuiz', async (req, res) => {
     const CANTIDAD_PREGUNTAS = 10;
     let tipoPreg = 1;
@@ -157,6 +197,121 @@ router.get('/gQuiz', async (req, res) => {
         console.log(res.data);
     }) */
 });
+
+router.get('/gPreguntaDificultad/:tipo/:dif', (req, res) => {
+    const { tipo } = req.params;
+    const {dif} = req.params;
+    mysqlPoolConnection.getConnection((err, connection) => {
+        connection.query('SELECT * FROM bidymhlzbianwu4rbvbz.Pregunta AS p WHERE p.Ti_id_tipo= ? AND p.Dif_id_dificultad = ?', [tipo, dif], async (err, rows, fields) => {
+            if (!err) {
+                let r = random.int(0, rows.length - 1);
+
+                let pregunta = rows[r];
+
+                connection.release();
+
+                let opciones = await getOpcion(pregunta.id_Pregunta);
+                let ayuda = await getAyuda(pregunta.id_Pregunta);
+                let costos = await getCostos(pregunta.id_Pregunta);
+
+                if (tipo == 4) {
+                    opciones = opciones[0].contenido.split('-');
+                    /* console.log(opciones); */
+
+                }
+
+                if (tipo == 5) {
+                    let opcionesmejores = [];
+                    let otroVector = [];
+                    let contador = 0;
+                    let aux2 = 1;
+                    opciones = opciones[0].contenido.split(',');
+                    for (opcion of opciones) {
+                        let aux = opcion.split('-');
+                        opcionesmejores.push(aux[0]);
+                        opcionesmejores.push(aux[1]);
+                    }
+                    for (opcionMejor of opcionesmejores) {
+                        if (contador > 1) {
+                            aux2++
+                            contador = 0
+                        }
+                        let aux3 = {
+                            contenido: opcionMejor,
+                            valor: aux2
+                        }
+                        otroVector.push(aux3);
+                        contador++
+                    }
+                    opciones = otroVector;
+                }
+
+                if (tipo != 4) {
+                    opciones = shuffle(opciones);
+                }
+
+
+
+                res.json({
+                    idPregunta: pregunta.id_Pregunta,
+                    tipoPregunta: pregunta.Ti_id_tipo,
+                    enunciado: pregunta.enunciado,
+                    opciones: opciones,
+                    ayuda: ayuda[0].contenido,
+                    tip: pregunta.tip,
+                    costos: costos
+                });
+
+
+            } else {
+                console.log(err);
+            }
+        });
+
+    });
+});
+
+router.get('/gQuizDificultad/:dif', async (req, res) => {
+    const CANTIDAD_PREGUNTAS = 10;
+    const {dif} = req.params;
+    let tipoPreg = 1;
+    let quiz = [];
+    let aux;
+    let aux2; 
+    for (let i = 0; i < CANTIDAD_PREGUNTAS; i++) {
+        if (i != 0 && i % 2 == 0) {
+            tipoPreg++;
+            /* console.log(tipoPreg); */
+        }
+        if (quiz.length !=0) {
+            do {
+                await axios.get(`https://speedquiz-services.herokuapp.com/gPreguntaDificultad/${tipoPreg}/${dif}`).then(res => {
+                    aux = res.data;
+                });
+                aux2 = quiz.map(data => data.idPregunta)
+            } while (aux2.indexOf(aux.idPregunta) >= 0);
+            quiz.push(aux);
+        }else{
+            await axios.get(`https://speedquiz-services.herokuapp.com/gPreguntaDificultad/${tipoPreg}/${dif}`).then(res => {
+                quiz.push(res.data);
+            });
+        }
+
+    }
+   /*  console.log(aux2); */
+    res.json({
+        size: quiz.length,
+        quiz: shuffle(quiz)
+    });
+
+
+
+    /* axios.get(`http://localhost:3000/gPregunta/${tipoPreg}`).then(res => {
+        console.log(res.data);
+    }) */
+});
+
+
 
 /* function shuffle(array) {
     array.sort(() => Math.random() - 0.5);
